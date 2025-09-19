@@ -1,0 +1,10 @@
+{
+  "SEARCH_APP_ID": "932747118",
+  "MAX_CONCURRENT": 1,
+  "PROXY_LIST": [],
+  "HEADLESS": true,
+  "MIN_DELAY": 5,
+  "MAX_DELAY": 10,
+  "INPUT_FILE": "accounts.json",
+  "OUTPUT_FILE": "accounts_checked.json"
+}

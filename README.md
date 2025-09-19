@@ -23,6 +23,23 @@ playwright install
 python checker.py
 ```
 
+5. 参数
+```json
+config.json
+
+{
+  "SEARCH_APP_ID": "932747118", // apple 应用唯一id，参考https://apps.apple.com/us/app/shadowrocket/id932747118 中 id后的部分；
+  "MAX_CONCURRENT": 1, // 并行检测数，需要配合 proxy list 进行使用；
+  "PROXY_LIST": [], // 代理
+  "HEADLESS": true, // 无窗口运行；
+  "MIN_DELAY": 5,
+  "MAX_DELAY": 10,
+  "INPUT_FILE": "accounts.json",
+  "OUTPUT_FILE": "accounts_checked.json"
+}
+```
+6. 
+
 ## 使用指南
 ### 输入
 需要在程序同一目录下存在 `accounts.json`, 该文件内容接口如下
@@ -30,7 +47,8 @@ python checker.py
 [
     {
         "id": "account1",
-        "password": "passwordForAccount1"
+        "password": "passwordForAccount1",
+        "search_app": "932747118" // 程序也可以全局设置默认软件，SEARCH_APP_ID
     },
 	{
         "id": "account2",
