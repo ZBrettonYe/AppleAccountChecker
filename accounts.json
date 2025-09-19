@@ -3,8 +3,8 @@
         "id": "account1",
         "password": "passwordForAccount1"
     },
-	{
+    {
         "id": "account2",
         "password": "passwordForAccount2"
-    },
+    }
 ]
