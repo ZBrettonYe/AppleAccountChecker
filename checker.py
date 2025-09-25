@@ -354,7 +354,8 @@ async def process_account(playwright, account: Dict) -> Dict:
                     account['check'] = f"❌登录信息不完整，缺少: {', '.join(missing)}"
                     break
 
-                print(f"✅ 成功获取账号 {account['id']} 的认证信息，开始检索...")
+                print(
+                    f"\033[34mℹ️ 成功获取账号 {account['id']} 的认证信息，开始检索...\033[0m")
 
                 # 第二阶段：查找App
                 try:
@@ -375,7 +376,7 @@ async def process_account(playwright, account: Dict) -> Dict:
 
         except Exception as e:
             if attempt < max_retries - 1:
-                print(f"账号 {account['id']} 处理失败 ({e})，重试中...")
+                print(f"❗账号 {account['id']} 处理失败 ({e})，重试中...")
                 await asyncio.sleep(random.uniform(MIN_DELAY, MAX_DELAY))
                 continue
             account['check'] = f"❌处理失败: {str(e)}"
@@ -480,18 +481,20 @@ async def main():
                 print(f"⏭️ 跳过已处理: {account['id']}")
 
         if not accounts_to_process:
-            print("✅ 所有账号都已处理完成！")
+            print("\033[32m✅ 所有账号都已处理完成！\033[0m")
             return
 
         # 显示运行信息
-        print(f"\n{'='*60}")
-        print(f"🚀 Apple账号检查器")
-        print(f"{'='*60}")
-        print(f"📋 待处理: {len(accounts_to_process)}/{len(accounts)}")
-        print(f"🔍 搜索软件: {SEARCH_APP_ID}")
-        print(f"🌐 模式: {'代理' if PROXY_LIST and MAX_CONCURRENT > 1 else '直连'}")
-        print(f"⚡ 并发数: {MAX_CONCURRENT}")
-        print(f"{'='*60}\n")
+        print(f"\n\033[36m{'='*60}\033[0m")
+        print("\033[36m🚀 Apple账号检查器\033[0m")
+        print(f"\033[36m{'='*60}\033[0m")
+        print(
+            f"\033[36m📋 待处理: {len(accounts_to_process)}/{len(accounts)}\033[0m")
+        print(f"\033[36m🔍 搜索软件: {SEARCH_APP_ID}\033[0m")
+        print(
+            f"\033[36m🌐 模式: {'代理' if PROXY_LIST and MAX_CONCURRENT > 1 else '直连'}\033[0m")
+        print(f"\033[36m⚡ 并发数: {MAX_CONCURRENT}\033[0m")
+        print(f"\033[36m{'='*60}\n\033[0m")
 
         async with async_playwright() as playwright:
             if PROXY_LIST and MAX_CONCURRENT > 1:
@@ -507,39 +510,51 @@ async def main():
                 for i, future in enumerate(asyncio.as_completed(tasks), 1):
                     result = await future
                     print(
-                        f"[{i}/{len(tasks)}] ✅ {result['id']} - {result['check']}")
+                        f"\033[32m[{i}/{len(tasks)}] ✅ {result['id']} - {result['check']}\033[0m" if result.get('check') is True else
+                        f"\033[31m[{i}/{len(tasks)}] ⛔ {result['id']} - {result['check']}\033[0m" if result.get('check') is False else
+                        f"\033[33m[{i}/{len(tasks)}] ❗ {result['id']} - {result['check']}\033[0m"
+                    )
             else:
                 # 顺序处理
                 for i, account in enumerate(accounts_to_process):
-                    print(f"\n⏳ 处理 {i+1}/{len(accounts_to_process)}")
-                    result = await process_account(playwright, account)
                     print(
-                        f"✅ {result['id']} - {result['check']} ({result.get('process_time', 'N/A')})")
+                        f"\n\033[34m⏳ 处理 {i+1}/{len(accounts_to_process)}\033[0m")
+                    result = await process_account(playwright, account)
+                    check = result.get('check')
+                    if check is True:
+                        print(
+                            f"\033[32m✅ {result['id']} - 已购买 ({result.get('process_time', 'N/A')})\033[0m")
+                    elif check is False:
+                        print(
+                            f"\033[31m⛔ {result['id']} - 未购买 ({result.get('process_time', 'N/A')})\033[0m")
+                    else:
+                        print(
+                            f"\033[33m❗ {result['id']} - {check} ({result.get('process_time', 'N/A')})\033[0m")
 
         # 保存最终结果
         final_results = finalize_results(accounts)
 
         # 统计
         stats = {
-            '✔️成功': sum(1 for a in final_results if a.get('check') is True),
-            '❌未找到': sum(1 for a in final_results if a.get('check') is False),
-            '❗失败': sum(1 for a in final_results if isinstance(a.get('check'), str) and '❗' in a.get('check')),
-            '⏭️未处理': sum(1 for a in final_results if isinstance(a.get('check'), str) and '⏭️' in a.get('check'))
+            '✔️ 成功': sum(1 for a in final_results if a.get('check') is True),
+            '❌ 未找到': sum(1 for a in final_results if a.get('check') is False),
+            '❗ 失败': sum(1 for a in final_results if isinstance(a.get('check'), str) and '❗' in a.get('check')),
+            '⏭️ 未处理': sum(1 for a in final_results if isinstance(a.get('check'), str) and '⏭️' in a.get('check'))
         }
 
-        print(f"\n{'='*60}")
-        print(f"✅ 处理完成！")
-        print(f"📁 结果: {OUTPUT_FILE}")
-        print(f"\n📊 统计:")
+        print(f"\n\033[36m{'='*60}\033[0m")
+        print(f"\033[32m✅ 处理完成！\033[0m")
+        print(f"\033[36m📁 结果: {OUTPUT_FILE}\033[0m")
+        print(f"\n\033[36m📊 统计:\033[0m")
         for key, value in stats.items():
             if value > 0:
-                print(f"  {key}: {value}")
-        print(f"{'='*60}\n")
+                print(f"\033[36m  {key}: {value}\033[0m")
+        print(f"\033[36m{'='*60}\n\033[0m")
 
     except FileNotFoundError:
-        print(f"❌ 找不到文件: {INPUT_FILE}")
+        print(f"\033[31m❌ 找不到文件: {INPUT_FILE}\033[0m")
     except Exception as e:
-        print(f"❌ 程序错误: {str(e)}")
+        print(f"\033[31m❌ 程序错误: {str(e)}\033[0m")
         import traceback
         traceback.print_exc()
 
